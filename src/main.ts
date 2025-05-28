@@ -5,6 +5,14 @@ import { Logger } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Configuration CORS
+  app.enableCors({
+    origin: 'http://localhost:4200', // Frontend Angular
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true, // Si vous devez envoyer des cookies/tokens
+  });
+
   // Middleware de logging global
   app.use((req: any, res: any, next: () => void) => {
     const logger = new Logger('HTTP');
