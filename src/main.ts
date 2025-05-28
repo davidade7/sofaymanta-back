@@ -1,8 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+
+  // Middleware de logging global
+  app.use((req: any, res: any, next: () => void) => {
+    const logger = new Logger('HTTP');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    logger.log(`${req.method} => ${req.originalUrl}`);
+    next();
+  });
+
+  await app.listen(3000);
 }
+
 bootstrap();
