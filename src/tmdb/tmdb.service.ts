@@ -18,6 +18,27 @@ interface Movie {
   vote_average: number;
 }
 
+interface MovieDetails {
+  id: number;
+  title: string;
+  overview: string;
+  release_date: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  vote_average: number;
+  vote_count: number;
+  runtime: number;
+  genres: Array<{ id: number; name: string }>;
+  production_companies: Array<{ id: number; name: string; logo_path?: string }>;
+  production_countries: Array<{ iso_3166_1: string; name: string }>;
+  spoken_languages: Array<{ iso_639_1: string; name: string }>;
+  budget: number;
+  revenue: number;
+  status: string;
+  tagline?: string;
+  homepage?: string;
+}
+
 @Injectable()
 export class TmdbService {
   private readonly apiUrl: string;
@@ -58,6 +79,48 @@ export class TmdbService {
       const axiosError = error as AxiosError;
       throw new HttpException(
         `Erreur lors de la récupération des films: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getMovieDetails(
+    movieId: number,
+    language: string = 'es-ES',
+  ): Promise<MovieDetails> {
+    try {
+      const response = await axios.get<MovieDetails>(
+        `${this.apiUrl}/movie/${movieId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: {
+            language: language,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+
+      console.error('API Error:', {
+        status: axiosError.response?.status,
+        statusText: axiosError.response?.statusText,
+        data: axiosError.response?.data,
+        url: axiosError.config?.url,
+      });
+
+      if (axiosError.response?.status === 404) {
+        throw new HttpException(
+          `Film avec l'ID ${movieId} introuvable`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      throw new HttpException(
+        `Erreur lors de la récupération des détails du film: ${axiosError.message || 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
