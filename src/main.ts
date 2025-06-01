@@ -7,7 +7,11 @@ async function bootstrap() {
 
   // Configuration CORS
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:4200'], // Les deux origines
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:4200',
+      'https://sofaymanta-front.vercel.app',
+    ], // Les deux origines
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // Si vous devez envoyer des cookies/tokens
