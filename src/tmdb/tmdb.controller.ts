@@ -7,8 +7,8 @@ export class TmdbController {
   constructor(private readonly tmdbService: TmdbService) {}
 
   @Get('recent')
-  async getRecentMovies(): Promise<any> {
-    return this.tmdbService.getRecentMovies();
+  async getRecentMovies(@Query('lang') lang: string): Promise<any> {
+    return this.tmdbService.getRecentMovies(lang || 'es-ES');
   }
 
   @Get('detail/:id')

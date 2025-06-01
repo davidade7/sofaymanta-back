@@ -53,7 +53,7 @@ export class TmdbService {
     this.accessToken = accessToken;
   }
 
-  async getRecentMovies(): Promise<Movie[]> {
+  async getRecentMovies(language: string = 'es-ES'): Promise<Movie[]> {
     try {
       const response = await axios.get<MovieResponse>(
         `${this.apiUrl}/discover/movie`,
@@ -65,7 +65,7 @@ export class TmdbService {
           params: {
             include_adult: false,
             include_video: false,
-            language: 'fr-FR',
+            language: language,
             page: 1,
             sort_by: 'popularity.desc',
             with_release_type: '2|3',
