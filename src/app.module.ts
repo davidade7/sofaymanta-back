@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TmdbModule } from './tmdb/tmdb.module';
+import { TmdbModule } from './media/media.module';
 
 @Module({
   imports: [

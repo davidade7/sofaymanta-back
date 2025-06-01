@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ParseIntPipe } from '@nestjs/common';
-import { TmdbService } from './tmdb.service';
+import { TmdbService } from './media.service';
 
 @Controller('movies')
 export class TmdbController {

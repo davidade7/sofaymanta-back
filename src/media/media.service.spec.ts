@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TmdbService } from './tmdb.service';
+import { TmdbService } from './media.service';
 
 describe('TmdbService', () => {
   let service: TmdbService;

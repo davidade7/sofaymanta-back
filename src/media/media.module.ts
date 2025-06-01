@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TmdbController } from './tmdb.controller';
-import { TmdbService } from './tmdb.service';
+import { TmdbController } from './media.controller';
+import { TmdbService } from './media.service';
 
 @Module({
   controllers: [TmdbController],

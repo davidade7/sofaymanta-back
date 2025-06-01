@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TmdbController } from './tmdb.controller';
+import { TmdbController } from './media.controller';
 
 describe('TmdbController', () => {
   let controller: TmdbController;
