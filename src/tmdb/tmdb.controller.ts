@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ParseIntPipe } from '@nestjs/common';
 import { TmdbService } from './tmdb.service';
 
@@ -11,11 +11,11 @@ export class TmdbController {
     return this.tmdbService.getRecentMovies();
   }
 
-  @Get('detail/:id/:language')
+  @Get('detail/:id')
   async getMovieDetails(
     @Param('id', ParseIntPipe) id: number,
-    @Param('language') language: string,
+    @Query('lang') lang: string,
   ): Promise<any> {
-    return this.tmdbService.getMovieDetails(id, language);
+    return this.tmdbService.getMovieDetails(id, lang || 'es-ES');
   }
 }
