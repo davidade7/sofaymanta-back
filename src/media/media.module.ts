@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TmdbController } from './media.controller';
-import { TmdbService } from './media.service';
+import { MediaController } from './media.controller';
+import { MediaService } from './media.service';
 
 @Module({
-  controllers: [TmdbController],
-  providers: [TmdbService],
-  exports: [TmdbService],
+  controllers: [MediaController],
+  providers: [MediaService],
+  exports: [MediaService],
 })
-export class TmdbModule {}
+export class MediaModule {}

@@ -1,14 +1,14 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ParseIntPipe } from '@nestjs/common';
-import { TmdbService } from './media.service';
+import { MediaService } from './media.service';
 
 @Controller('media')
-export class TmdbController {
-  constructor(private readonly tmdbService: TmdbService) {}
+export class MediaController {
+  constructor(private readonly mediaService: MediaService) {}
 
   @Get('movies/recent')
   async getRecentMovies(@Query('lang') lang: string): Promise<any> {
-    return this.tmdbService.getRecentMovies(lang || 'es-ES');
+    return this.mediaService.getRecentMovies(lang || 'es-ES');
   }
 
   @Get('movies/detail/:id')
@@ -16,6 +16,11 @@ export class TmdbController {
     @Param('id', ParseIntPipe) id: number,
     @Query('lang') lang: string,
   ): Promise<any> {
-    return this.tmdbService.getMovieDetails(id, lang || 'es-ES');
+    return this.mediaService.getMovieDetails(id, lang || 'es-ES');
+  }
+
+  @Get('tv/recent')
+  async getRecentTvShows(@Query('lang') lang: string): Promise<any> {
+    return this.mediaService.getRecentTvShows(lang || 'es-ES');
   }
 }

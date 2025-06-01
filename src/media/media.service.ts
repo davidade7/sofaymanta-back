@@ -39,8 +39,24 @@ interface MovieDetails {
   homepage?: string;
 }
 
+interface TvShow {
+  id: number;
+  name: string; // Note: 'name' pour les séries, pas 'title'
+  overview: string;
+  first_air_date: string;
+  poster_path?: string;
+  vote_average: number;
+}
+
+interface TvShowResponse {
+  results: TvShow[];
+  page: number;
+  total_pages: number;
+  total_results: number;
+}
+
 @Injectable()
-export class TmdbService {
+export class MediaService {
   private readonly apiUrl: string;
   private readonly accessToken: string;
 
@@ -121,6 +137,31 @@ export class TmdbService {
 
       throw new HttpException(
         `Erreur lors de la récupération des détails du film: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getRecentTvShows(language: string = 'es-ES'): Promise<TvShow[]> {
+    try {
+      const response = await axios.get<TvShowResponse>(
+        `${this.apiUrl}/tv/on_the_air`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: {
+            language: language,
+            page: 1,
+          },
+        },
+      );
+      return response.data.results;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new HttpException(
+        `Erreur lors de la récupération des séries: ${axiosError.message || 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
