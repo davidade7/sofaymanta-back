@@ -167,6 +167,38 @@ export class MediaService {
     }
   }
 
+  async getTvShowDetails(
+    tvId: number,
+    language: string = 'es-ES',
+  ): Promise<any> {
+    try {
+      const response = await axios.get(`${this.apiUrl}/tv/${tvId}`, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          accept: 'application/json',
+        },
+        params: {
+          language: language,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+
+      if (axiosError.response?.status === 404) {
+        throw new HttpException(
+          `Série avec l'ID ${tvId} introuvable`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      throw new HttpException(
+        `Erreur lors de la récupération des détails de la série: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   private getDateString(daysOffset: number): string {
     const date = new Date();
     date.setDate(date.getDate() + daysOffset);

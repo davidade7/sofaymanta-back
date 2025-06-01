@@ -23,4 +23,12 @@ export class MediaController {
   async getRecentTvShows(@Query('lang') lang: string): Promise<any> {
     return this.mediaService.getRecentTvShows(lang || 'es-ES');
   }
+
+  @Get('tv/detail/:id')
+  async getTvShowDetails(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('lang') lang: string,
+  ): Promise<any> {
+    return this.mediaService.getTvShowDetails(id, lang || 'es-ES');
+  }
 }
