@@ -199,6 +199,40 @@ export class MediaService {
     }
   }
 
+  async getTvShowSeasonDetails(
+    serieId: number,
+    seasonNumber: number,
+    language: string = 'es-ES',
+  ): Promise<any> {
+    try {
+      const response = await axios.get(
+        `${this.apiUrl}/tv/${serieId}/season/${seasonNumber}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: {
+            language: language,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        throw new HttpException(
+          `Saison ${seasonNumber} de la série avec l'ID ${serieId} introuvable`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        `Erreur lors de la récupération des détails de la saison: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   private getDateString(daysOffset: number): string {
     const date = new Date();
     date.setDate(date.getDate() + daysOffset);

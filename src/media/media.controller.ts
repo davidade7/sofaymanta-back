@@ -31,4 +31,17 @@ export class MediaController {
   ): Promise<any> {
     return this.mediaService.getTvShowDetails(id, lang || 'es-ES');
   }
+
+  @Get('tv/:seriesId/season/:seasonNumber')
+  async getTvShowSeasonDetails(
+    @Param('seriesId', ParseIntPipe) seriesId: number,
+    @Param('seasonNumber', ParseIntPipe) seasonNumber: number,
+    @Query('lang') lang: string,
+  ): Promise<any> {
+    return this.mediaService.getTvShowSeasonDetails(
+      seriesId,
+      seasonNumber,
+      lang || 'es-ES',
+    );
+  }
 }

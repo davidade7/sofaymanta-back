@@ -1,0 +1,15 @@
+meta {
+  name: Get tv season detail
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:3000/media/tv/61818/season/1?lang=es-ES
+  body: none
+  auth: inherit
+}
+
+params:query {
+  lang: es-ES
+}
