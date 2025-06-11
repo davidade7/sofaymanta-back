@@ -206,6 +206,44 @@ export class MediaService {
     }
   }
 
+  async getPopularTvShows(language: string = 'es-ES'): Promise<TvShow[]> {
+    try {
+      // Récupérer les 100 séries les mieux notées (5 pages de 20 séries)
+      const allTvShows: TvShow[] = [];
+
+      for (let page = 1; page <= 5; page++) {
+        const response = await axios.get<TvShowResponse>(
+          `${this.apiUrl}/discover/tv`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+              accept: 'application/json',
+            },
+            params: {
+              include_adult: false,
+              language: language,
+              page: page,
+              sort_by: 'vote_average.desc',
+              'vote_count.gte': 500, // Minimum de votes pour éviter les séries obscures
+              'first_air_date.gte': '2000-01-01', // Séries depuis 2000 pour la pertinence
+            },
+          },
+        );
+        allTvShows.push(...response.data.results);
+      }
+
+      // Mélanger le tableau et retourner 30 séries au hasard
+      const shuffledTvShows = this.shuffleArray([...allTvShows]);
+      return shuffledTvShows.slice(0, 30);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new HttpException(
+        `Erreur lors de la récupération des séries populaires: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async getTvShowDetails(
     tvId: number,
     language: string = 'es-ES',
