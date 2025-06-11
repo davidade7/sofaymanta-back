@@ -11,6 +11,11 @@ export class MediaController {
     return this.mediaService.getRecentMovies(lang || 'es-ES');
   }
 
+  @Get('movies/popular')
+  async getPopularMovies(@Query('lang') lang: string): Promise<any> {
+    return this.mediaService.getPopularMovies(lang || 'es-ES');
+  }
+
   @Get('movies/detail/:id')
   async getMovieDetails(
     @Param('id', ParseIntPipe) id: number,

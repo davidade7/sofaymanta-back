@@ -142,6 +142,30 @@ export class MediaService {
     }
   }
 
+  async getPopularMovies(language: string = 'es-ES'): Promise<Movie[]> {
+    try {
+      const response = await axios.get<MovieResponse>(
+        `${this.apiUrl}/movie/popular`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: {
+            language: language,
+          },
+        },
+      );
+      return response.data.results;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new HttpException(
+        `Erreur lors de la récupération des films populaires: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async getRecentTvShows(language: string = 'es-ES'): Promise<TvShow[]> {
     try {
       const response = await axios.get<TvShowResponse>(
