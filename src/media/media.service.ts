@@ -144,19 +144,34 @@ export class MediaService {
 
   async getPopularMovies(language: string = 'es-ES'): Promise<Movie[]> {
     try {
-      const response = await axios.get<MovieResponse>(
-        `${this.apiUrl}/movie/popular`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            accept: 'application/json',
+      // Récupérer les 100 films les mieux notés (5 pages de 20 films)
+      const allMovies: Movie[] = [];
+
+      for (let page = 1; page <= 5; page++) {
+        const response = await axios.get<MovieResponse>(
+          `${this.apiUrl}/discover/movie`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+              accept: 'application/json',
+            },
+            params: {
+              include_adult: false,
+              include_video: false,
+              language: language,
+              page: page,
+              sort_by: 'vote_average.desc',
+              'vote_count.gte': 1000, // Minimum de votes pour éviter les films obscurs
+              'release_date.gte': '2000-01-01', // Films depuis 2000 pour la pertinence
+            },
           },
-          params: {
-            language: language,
-          },
-        },
-      );
-      return response.data.results;
+        );
+        allMovies.push(...response.data.results);
+      }
+
+      // Mélanger le tableau et retourner 30 films au hasard
+      const shuffledMovies = this.shuffleArray([...allMovies]);
+      return shuffledMovies.slice(0, 30);
     } catch (error) {
       const axiosError = error as AxiosError;
       throw new HttpException(
@@ -261,5 +276,14 @@ export class MediaService {
     const date = new Date();
     date.setDate(date.getDate() + daysOffset);
     return date.toISOString().split('T')[0];
+  }
+
+  private shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   }
 }
