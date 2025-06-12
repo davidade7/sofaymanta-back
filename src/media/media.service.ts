@@ -55,6 +55,58 @@ interface TvShowResponse {
   total_results: number;
 }
 
+interface MultiSearchResponse {
+  page: number;
+  results: MultiSearchResult[];
+  total_pages: number;
+  total_results: number;
+}
+
+type MultiSearchResult =
+  | MovieSearchResult
+  | TvShowSearchResult
+  | PersonSearchResult;
+
+interface BaseSearchResult {
+  id: number;
+  media_type: string;
+  popularity: number;
+  backdrop_path?: string;
+  adult: boolean;
+  original_language: string;
+  genre_ids: number[];
+  vote_average: number;
+  vote_count: number;
+}
+
+interface MovieSearchResult extends BaseSearchResult {
+  media_type: 'movie';
+  title: string;
+  original_title: string;
+  overview: string;
+  release_date: string;
+  poster_path?: string;
+  video: boolean;
+}
+
+interface TvShowSearchResult extends BaseSearchResult {
+  media_type: 'tv';
+  name: string;
+  original_name: string;
+  overview: string;
+  first_air_date: string;
+  poster_path?: string;
+  origin_country: string[];
+}
+
+interface PersonSearchResult extends BaseSearchResult {
+  media_type: 'person';
+  name: string;
+  profile_path?: string;
+  known_for_department: string;
+  known_for: (MovieSearchResult | TvShowSearchResult)[];
+}
+
 @Injectable()
 export class MediaService {
   private readonly apiUrl: string;
@@ -67,6 +119,43 @@ export class MediaService {
       throw new Error('TMDB_ACCESS_TOKEN not found in environment variables');
     }
     this.accessToken = accessToken;
+  }
+
+  async searchMultimedia(
+    query: string,
+    language: string = 'es-ES',
+  ): Promise<MultiSearchResult[]> {
+    try {
+      const response = await axios.get<MultiSearchResponse>(
+        `${this.apiUrl}/search/multi`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: {
+            query: query,
+            include_adult: false,
+            language: language,
+            page: 1, // Limiter à la première page pour éviter trop de résultats
+          },
+        },
+      );
+
+      // Vérifier que les résultats sont conformes aux types attendus
+      return response.data.results.filter(
+        (result) =>
+          result.media_type === 'movie' ||
+          result.media_type === 'tv' ||
+          result.media_type === 'person',
+      );
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new HttpException(
+        `Erreur lors de la recherche multimédia: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getRecentMovies(language: string = 'es-ES'): Promise<Movie[]> {

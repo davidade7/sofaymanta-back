@@ -6,6 +6,14 @@ import { MediaService } from './media.service';
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
+  @Get('search')
+  async searchMultimedia(
+    @Query('query') query: string,
+    @Query('lang') lang: string,
+  ): Promise<any> {
+    return this.mediaService.searchMultimedia(query, lang || 'es-ES');
+  }
+
   @Get('movies/recent')
   async getRecentMovies(@Query('lang') lang: string): Promise<any> {
     return this.mediaService.getRecentMovies(lang || 'es-ES');
