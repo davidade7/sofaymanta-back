@@ -70,4 +70,12 @@ export class MediaController {
   ): Promise<any> {
     return this.mediaService.getPersonDetails(id, lang || 'es-ES');
   }
+
+  @Get('person/:id/combinedCredits')
+  async getPersonCredits(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('lang') lang: string,
+  ): Promise<any> {
+    return this.mediaService.getPersonCredits(id, lang || 'es-ES');
+  }
 }
