@@ -62,4 +62,12 @@ export class MediaController {
       lang || 'es-ES',
     );
   }
+
+  @Get('person/:id')
+  async getPersonDetails(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('lang') lang: string,
+  ): Promise<any> {
+    return this.mediaService.getPersonDetails(id, lang || 'es-ES');
+  }
 }
