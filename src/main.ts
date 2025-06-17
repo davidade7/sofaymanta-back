@@ -12,7 +12,7 @@ async function bootstrap() {
       'http://localhost:4200',
       'https://sofaymanta-front.vercel.app',
     ], // Les deux origines
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // Si vous devez envoyer des cookies/tokens
   });
