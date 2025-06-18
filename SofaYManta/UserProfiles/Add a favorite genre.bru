@@ -1,0 +1,18 @@
+meta {
+  name: Add a favorite genre
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/user-profiles/ba193a6e-2df7-4d85-850c-3baeb36b9d4a/favorite-genres
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "genreId": "99",
+    "mediaType": "tv"
+  }
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Delete favorite
+  type: http
+  seq: 3
+}
+
+delete {
+  url: http://localhost:3000/user-profiles/ba193a6e-2df7-4d85-850c-3baeb36b9d4a/favorite-genres/99?mediaType=tv
+  body: none
+  auth: inherit
+}
+
+params:query {
+  mediaType: tv
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Add a streaming platform
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3000/user-profiles/ba193a6e-2df7-4d85-850c-3baeb36b9d4a/streaming-platforms
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "platform": "hulu"
+  }
+}
