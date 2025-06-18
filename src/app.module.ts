@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { MediaModule } from './media/media.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { UserProfileModule } from './user-profile/user-profile.module';
+import { UserMediaInteractionsModule } from './user-media-interactions/user-media-interactions.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserProfileModule } from './user-profile/user-profile.module';
     SupabaseModule,
     MediaModule,
     UserProfileModule,
+    UserMediaInteractionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

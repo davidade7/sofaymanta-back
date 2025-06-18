@@ -1,0 +1,20 @@
+meta {
+  name: Post an interaction
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/user-media-interactions/ba193a6e-2df7-4d85-850c-3baeb36b9d4a
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "media_id": 550,
+    "media_type": "movie",
+    "rating": 7,
+    "comment": "Super film"
+  }
+}
