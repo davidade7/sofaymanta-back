@@ -32,6 +32,14 @@ export class MediaController {
     return this.mediaService.getMovieDetails(id, lang || 'es-ES');
   }
 
+  @Get('movies/:id/credits')
+  async getMovieCredits(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('lang') lang: string,
+  ): Promise<any> {
+    return this.mediaService.getMovieCredits(id, lang || 'es-ES');
+  }
+
   @Get('tv/recent')
   async getRecentTvShows(@Query('lang') lang: string): Promise<any> {
     return this.mediaService.getRecentTvShows(lang || 'es-ES');

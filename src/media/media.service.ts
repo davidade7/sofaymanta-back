@@ -107,6 +107,41 @@ interface PersonSearchResult extends BaseSearchResult {
   known_for: (MovieSearchResult | TvShowSearchResult)[];
 }
 
+interface MovieCredits {
+  id: number;
+  cast: CastMember[];
+  crew: CrewMember[];
+}
+
+interface CastMember {
+  adult: boolean;
+  gender: number;
+  id: number;
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number;
+  profile_path?: string;
+  cast_id: number;
+  character: string;
+  credit_id: string;
+  order: number;
+}
+
+interface CrewMember {
+  adult: boolean;
+  gender: number;
+  id: number;
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number;
+  profile_path?: string;
+  credit_id: string;
+  department: string;
+  job: string;
+}
+
 @Injectable()
 export class MediaService {
   private readonly apiUrl: string;
@@ -265,6 +300,39 @@ export class MediaService {
       const axiosError = error as AxiosError;
       throw new HttpException(
         `Erreur lors de la récupération des films populaires: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getMovieCredits(
+    movieId: number,
+    language: string = 'es-ES',
+  ): Promise<MovieCredits> {
+    try {
+      const response = await axios.get<MovieCredits>(
+        `${this.apiUrl}/movie/${movieId}/credits`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: {
+            language: language,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        throw new HttpException(
+          `Film avec l'ID ${movieId} introuvable`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        `Erreur lors de la récupération des crédits du film: ${axiosError.message || 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
