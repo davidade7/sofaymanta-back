@@ -18,6 +18,16 @@ export class CreateUserMediaInteractionDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(1)
+  season_number?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  episode_number?: number;
+
+  @IsOptional()
+  @IsNumber()
   @Min(0)
   @Max(10)
   rating?: number;

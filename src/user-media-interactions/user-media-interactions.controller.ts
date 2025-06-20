@@ -49,6 +49,39 @@ export class UserMediaInteractionsController {
     );
   }
 
+  @Get('user/:userId/media/:mediaId/details')
+  async findByUserAndMediaDetails(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Param('mediaId', ParseIntPipe) mediaId: number,
+    @Query('mediaType') mediaType: 'movie' | 'tv',
+    @Query('seasonNumber', new ParseIntPipe({ optional: true }))
+    seasonNumber?: number,
+    @Query('episodeNumber', new ParseIntPipe({ optional: true }))
+    episodeNumber?: number,
+  ) {
+    return this.userMediaInteractionsService.findByUserAndMediaDetails(
+      userId,
+      mediaId,
+      mediaType,
+      seasonNumber,
+      episodeNumber,
+    );
+  }
+
+  @Get('user/:userId/media/:mediaId/episodes/ratings')
+  async getEpisodeRatings(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Param('mediaId', ParseIntPipe) mediaId: number,
+    @Query('seasonNumber', new ParseIntPipe({ optional: true }))
+    seasonNumber?: number,
+  ) {
+    return this.userMediaInteractionsService.getEpisodeRatings(
+      userId,
+      mediaId,
+      seasonNumber,
+    );
+  }
+
   @Get('user/:userId/ratings')
   async getUserRatings(
     @Param('userId', ParseUUIDPipe) userId: string,
