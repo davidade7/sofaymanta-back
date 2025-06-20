@@ -71,6 +71,21 @@ export class MediaController {
     );
   }
 
+  @Get('tv/:seriesId/season/:seasonNumber/episode/:episodeNumber')
+  async getTvShowEpisodeDetails(
+    @Param('seriesId', ParseIntPipe) seriesId: number,
+    @Param('seasonNumber', ParseIntPipe) seasonNumber: number,
+    @Param('episodeNumber', ParseIntPipe) episodeNumber: number,
+    @Query('lang') lang: string,
+  ): Promise<any> {
+    return this.mediaService.getTvShowEpisodeDetails(
+      seriesId,
+      seasonNumber,
+      episodeNumber,
+      lang || 'es-ES',
+    );
+  }
+
   @Get('person/:id')
   async getPersonDetails(
     @Param('id', ParseIntPipe) id: number,

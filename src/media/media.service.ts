@@ -142,6 +142,37 @@ interface CrewMember {
   job: string;
 }
 
+interface TvEpisodeDetails {
+  id: number;
+  name: string;
+  overview: string;
+  air_date: string;
+  episode_number: number;
+  episode_type: string;
+  season_number: number;
+  still_path?: string;
+  vote_average: number;
+  vote_count: number;
+  runtime?: number;
+  production_code: string;
+  crew: CrewMember[];
+  guest_stars: GuestStar[];
+}
+
+interface GuestStar {
+  character: string;
+  credit_id: string;
+  order: number;
+  adult: boolean;
+  gender: number;
+  id: number;
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number;
+  profile_path?: string;
+}
+
 @Injectable()
 export class MediaService {
   private readonly apiUrl: string;
@@ -462,6 +493,41 @@ export class MediaService {
       }
       throw new HttpException(
         `Erreur lors de la récupération des détails de la saison: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getTvShowEpisodeDetails(
+    seriesId: number,
+    seasonNumber: number,
+    episodeNumber: number,
+    language: string = 'es-ES',
+  ): Promise<TvEpisodeDetails> {
+    try {
+      const response = await axios.get<TvEpisodeDetails>(
+        `${this.apiUrl}/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: {
+            language: language,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        throw new HttpException(
+          `Épisode ${episodeNumber} de la saison ${seasonNumber} de la série avec l'ID ${seriesId} introuvable`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        `Erreur lors de la récupération des détails de l'épisode: ${axiosError.message || 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
