@@ -19,8 +19,8 @@ export class UserMediaInteractionsService {
     // Vérifier si une interaction existe déjà pour ce média
     const existingInteraction = await this.findByUserAndMedia(
       userId,
-      createDto.media_id,
-      createDto.media_type,
+      createDto.mediaId,
+      createDto.mediaType,
     );
 
     if (existingInteraction) {

@@ -10,11 +10,11 @@ import {
 
 export class CreateUserMediaInteractionDto {
   @IsNumber()
-  media_id: number;
+  mediaId: number;
 
   @IsString()
   @IsIn(['movie', 'tv'])
-  media_type: 'movie' | 'tv';
+  mediaType: 'movie' | 'tv';
 
   @IsOptional()
   @IsNumber()
