@@ -1,0 +1,19 @@
+meta {
+  name: Update one
+  type: http
+  seq: 5
+}
+
+patch {
+  url: http://localhost:3000/streaming-platforms/6d4aa2b4-c900-4e07-a61e-5f2024a90121
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "code": "hola",
+    "name": "Hola Test!!!!!",
+    "is_active": false
+  }
+}

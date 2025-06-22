@@ -1,0 +1,15 @@
+meta {
+  name: Get ALL
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3000/streaming-platforms
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~activeOnly: true
+}

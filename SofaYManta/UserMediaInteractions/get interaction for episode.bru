@@ -1,0 +1,17 @@
+meta {
+  name: get interaction for episode
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://sofaymanta-back-production.up.railway.app/user-media-interactions/user/ba193a6e-2df7-4d85-850c-3baeb36b9d4a/media/94605?mediaType=tv&seasonNumber=1&episodeNumber=2
+  body: none
+  auth: inherit
+}
+
+params:query {
+  mediaType: tv
+  seasonNumber: 1
+  episodeNumber: 2
+}

@@ -6,6 +6,7 @@ import { MediaModule } from './media/media.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { UserProfileModule } from './user-profile/user-profile.module';
 import { UserMediaInteractionsModule } from './user-media-interactions/user-media-interactions.module';
+import { StreamingPlatformsModule } from './streaming-platform/streaming-platform.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserMediaInteractionsModule } from './user-media-interactions/user-medi
     MediaModule,
     UserProfileModule,
     UserMediaInteractionsModule,
+    StreamingPlatformsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

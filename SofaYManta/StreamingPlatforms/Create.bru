@@ -1,0 +1,19 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/streaming-platforms
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "code": "holaaaa",
+    "name": "Hola Test",
+    "is_active": false
+  }
+}
