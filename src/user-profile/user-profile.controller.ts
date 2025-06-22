@@ -9,31 +9,58 @@ import {
   Query,
   ParseUUIDPipe,
   ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
-import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { WebhookUserDto } from './dto/webhook-user-profile.dto';
 
 @Controller('user-profiles')
 export class UserProfileController {
+  private readonly logger = new Logger(UserProfileController.name);
+
   constructor(private readonly userProfileService: UserProfileService) {}
+
+  @Post('webhook/create')
+  @HttpCode(HttpStatus.CREATED)
+  async createFromWebhook(@Body() webhookData: WebhookUserDto) {
+    if (webhookData.type !== 'INSERT' || webhookData.table !== 'users') {
+      return { success: false, message: 'Invalid webhook data' };
+    }
+
+    try {
+      const profile = await this.userProfileService.createFromWebhook(
+        webhookData.record.id,
+        webhookData.record.email,
+      );
+
+      return {
+        success: true,
+        message: 'User profile created successfully',
+        profile,
+      };
+    } catch (error: unknown) {
+      this.logger.error('Error creating user profile via webhook:', error);
+      let errorMessage = 'Unknown error';
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+      return {
+        success: false,
+        message: 'Error creating user profile',
+        error: errorMessage,
+      };
+    }
+  }
 
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userProfileService.getUserProfile(id);
+    return this.userProfileService.getUserProfileOrThrow(id);
   }
 
-  @Post(':userId')
-  async create(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() createUserProfileDto: CreateUserProfileDto,
-  ) {
-    return this.userProfileService.createUserProfile(
-      userId,
-      createUserProfileDto,
-    );
-  }
-
+  // Seule route de modification nécessaire
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,

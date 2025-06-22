@@ -1,14 +1,11 @@
 export class UserProfile {
   id: string;
-  username?: string;
-  created_at: Date;
-  updated_at: Date;
+  email: string;
+  role: 'user' | 'admin';
+  display_name?: string;
   favorite_movie_genres?: number[];
   favorite_tv_genres?: number[];
   streaming_platforms?: string[];
-
-  // Vous pouvez ajouter des méthodes utilitaires ici
-  get displayName(): string {
-    return this.username || 'Anonymous User';
-  }
+  created_at: string;
+  updated_at: string;
 }
