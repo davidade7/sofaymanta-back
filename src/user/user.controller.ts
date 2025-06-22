@@ -22,33 +22,41 @@ export class UsersController {
   @Post('webhook/create')
   @HttpCode(HttpStatus.CREATED)
   async createFromWebhook(@Body() webhookData: WebhookUserDto) {
-    this.logger.log('Webhook received for user creation:', webhookData);
+    // Valider que c'est bien un INSERT sur la table users
+    if (webhookData.type !== 'INSERT' || webhookData.table !== 'users') {
+      return { success: false, message: 'Invalid webhook data' };
+    }
 
     try {
-      // Extraire les données du record
       const createUserDto: CreateUserDto = {
         id: webhookData.record.id,
         email: webhookData.record.email,
-        role: 'user', // Rôle par défaut
+        role: 'user',
       };
 
       const user = await this.usersService.create(createUserDto);
-      this.logger.log(`User created successfully via webhook: ${user.id}`);
 
       return {
         success: true,
         message: 'User created successfully',
         user,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error('Error creating user via webhook:', error);
-      throw error;
+      let errorMessage = 'Unknown error';
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+      return {
+        success: false,
+        message: 'Error creating user',
+        error: errorMessage,
+      };
     }
   }
 
   @Get(':id')
   async findById(@Param('id', ParseUUIDPipe) id: string) {
-    this.logger.log(`Fetching user with ID: ${id}`);
-    return this.usersService.findById(id);
+    return this.usersService.findByIdOrThrow(id);
   }
 }

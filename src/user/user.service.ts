@@ -14,8 +14,7 @@ export class UsersService {
       // Vérifier si l'utilisateur existe déjà
       const existingUser = await this.findById(createUserDto.id);
       if (existingUser) {
-        this.logger.warn(`User with ID ${createUserDto.id} already exists`);
-        return existingUser; // Retourner l'utilisateur existant au lieu de throw
+        return existingUser;
       }
 
       const { data, error }: { data: User | null; error: any } =
@@ -27,8 +26,6 @@ export class UsersService {
               id: createUserDto.id,
               email: createUserDto.email,
               role: createUserDto.role || 'user',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
             },
           ])
           .select()
@@ -43,7 +40,6 @@ export class UsersService {
         throw new Error('User not created');
       }
 
-      this.logger.log(`User created successfully: ${data.id}`);
       return data;
     } catch (error) {
       this.logger.error('Failed to create user:', error);
@@ -76,7 +72,6 @@ export class UsersService {
     }
   }
 
-  // Nouvelle méthode pour la route GET qui throw une exception si non trouvé
   async findByIdOrThrow(id: string): Promise<User> {
     const user = await this.findById(id);
     if (!user) {
