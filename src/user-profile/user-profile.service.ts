@@ -26,7 +26,6 @@ export class UserProfileService {
               id,
               email,
               role: 'user',
-              is_public: true,
             },
           ])
           .select()
