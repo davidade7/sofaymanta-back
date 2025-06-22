@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { WebhookUserDto } from './dto/webhook-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -20,12 +21,20 @@ export class UsersController {
 
   @Post('webhook/create')
   @HttpCode(HttpStatus.CREATED)
-  async createFromWebhook(@Body() createUserDto: CreateUserDto) {
-    this.logger.log('Webhook received for user creation:', createUserDto);
+  async createFromWebhook(@Body() webhookData: WebhookUserDto) {
+    this.logger.log('Webhook received for user creation:', webhookData);
 
     try {
+      // Extraire les données du record
+      const createUserDto: CreateUserDto = {
+        id: webhookData.record.id,
+        email: webhookData.record.email,
+        role: 'user', // Rôle par défaut
+      };
+
       const user = await this.usersService.create(createUserDto);
       this.logger.log(`User created successfully via webhook: ${user.id}`);
+
       return {
         success: true,
         message: 'User created successfully',

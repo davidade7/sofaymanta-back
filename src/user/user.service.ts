@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
@@ -15,9 +15,7 @@ export class UsersService {
       const existingUser = await this.findById(createUserDto.id);
       if (existingUser) {
         this.logger.warn(`User with ID ${createUserDto.id} already exists`);
-        throw new ConflictException(
-          `Un utilisateur avec l'ID ${createUserDto.id} existe déjà`,
-        );
+        return existingUser; // Retourner l'utilisateur existant au lieu de throw
       }
 
       const { data, error }: { data: User | null; error: any } =
@@ -76,5 +74,14 @@ export class UsersService {
       this.logger.error(`Error finding user ${id}:`, error);
       return null;
     }
+  }
+
+  // Nouvelle méthode pour la route GET qui throw une exception si non trouvé
+  async findByIdOrThrow(id: string): Promise<User> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException(`Utilisateur avec l'ID ${id} introuvable`);
+    }
+    return user;
   }
 }
