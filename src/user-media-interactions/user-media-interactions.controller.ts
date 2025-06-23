@@ -95,6 +95,23 @@ export class UserMediaInteractionsController {
     return this.userMediaInteractionsService.getUserComments(userId);
   }
 
+  @Get('media/:mediaId/ratings')
+  async getMediaRatings(
+    @Param('mediaId', ParseIntPipe) mediaId: number,
+    @Query('mediaType') mediaType: 'movie' | 'tv',
+    @Query('seasonNumber', new ParseIntPipe({ optional: true }))
+    seasonNumber?: number,
+    @Query('episodeNumber', new ParseIntPipe({ optional: true }))
+    episodeNumber?: number,
+  ) {
+    return this.userMediaInteractionsService.getMediaRatings(
+      mediaId,
+      mediaType,
+      seasonNumber,
+      episodeNumber,
+    );
+  }
+
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.userMediaInteractionsService.findOne(id);

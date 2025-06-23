@@ -1,0 +1,17 @@
+meta {
+  name: Get media rating
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:3000/user-media-interactions/media/94605/ratings?mediaType=tv&seasonNumber=1&episodeNumber=2
+  body: none
+  auth: inherit
+}
+
+params:query {
+  mediaType: tv
+  seasonNumber: 1
+  episodeNumber: 2
+}

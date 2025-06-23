@@ -293,4 +293,43 @@ export class UserMediaInteractionsService {
 
     return data || [];
   }
+
+  async getMediaRatings(
+    mediaId: number,
+    mediaType: 'movie' | 'tv',
+    seasonNumber?: number,
+    episodeNumber?: number,
+  ): Promise<UserMediaInteraction[]> {
+    let query = this.supabaseService
+      .getClient()
+      .from('UserMediaInteractions')
+      .select('*')
+      .eq('media_id', mediaId)
+      .eq('media_type', mediaType)
+      .not('rating', 'is', null);
+
+    // Gestion des saisons et épisodes
+    if (seasonNumber !== undefined) {
+      query = query.eq('season_number', seasonNumber);
+    } else if (mediaType === 'movie') {
+      // Pour les films, s'assurer qu'il n'y a pas de saison/épisode
+      query = query.is('season_number', null).is('episode_number', null);
+    }
+
+    if (episodeNumber !== undefined) {
+      query = query.eq('episode_number', episodeNumber);
+    } else if (seasonNumber === undefined && mediaType === 'tv') {
+      // Si pas de saison spécifiée pour une série, prendre seulement les ratings de la série entière
+      query = query.is('season_number', null).is('episode_number', null);
+    } else if (seasonNumber !== undefined && episodeNumber === undefined) {
+      // Si saison spécifiée mais pas d'épisode, prendre les ratings de la saison
+      query = query.is('episode_number', null);
+    }
+
+    const { data, error }: { data: UserMediaInteraction[] | null; error: any } =
+      await query.order('rating', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
 }
