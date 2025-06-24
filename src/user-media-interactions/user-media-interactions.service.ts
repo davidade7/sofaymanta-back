@@ -299,11 +299,18 @@ export class UserMediaInteractionsService {
     mediaType: 'movie' | 'tv',
     seasonNumber?: number,
     episodeNumber?: number,
-  ): Promise<UserMediaInteraction[]> {
+  ): Promise<(UserMediaInteraction & { username?: string })[]> {
     let query = this.supabaseService
       .getClient()
       .from('UserMediaInteractions')
-      .select('*')
+      .select(
+        `
+        *,
+        UserProfiles:user_id (
+          username
+        )
+      `,
+      )
       .eq('media_id', mediaId)
       .eq('media_type', mediaType)
       .not('rating', 'is', null);
@@ -312,24 +319,29 @@ export class UserMediaInteractionsService {
     if (seasonNumber !== undefined) {
       query = query.eq('season_number', seasonNumber);
     } else if (mediaType === 'movie') {
-      // Pour les films, s'assurer qu'il n'y a pas de saison/épisode
       query = query.is('season_number', null).is('episode_number', null);
     }
 
     if (episodeNumber !== undefined) {
       query = query.eq('episode_number', episodeNumber);
     } else if (seasonNumber === undefined && mediaType === 'tv') {
-      // Si pas de saison spécifiée pour une série, prendre seulement les ratings de la série entière
       query = query.is('season_number', null).is('episode_number', null);
     } else if (seasonNumber !== undefined && episodeNumber === undefined) {
-      // Si saison spécifiée mais pas d'épisode, prendre les ratings de la saison
       query = query.is('episode_number', null);
     }
 
-    const { data, error }: { data: UserMediaInteraction[] | null; error: any } =
-      await query.order('rating', { ascending: false });
+    const { data, error } = await query.order('rating', { ascending: false });
 
     if (error) throw error;
+
+    for (const item of data) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      item.username = item.UserProfiles?.username || null;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      delete item.UserProfiles;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return data || [];
   }
 }
