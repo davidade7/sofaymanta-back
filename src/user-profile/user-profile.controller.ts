@@ -109,4 +109,22 @@ export class UserProfileController {
     await this.userProfileService.removeStreamingPlatform(id, platform);
     return { message: 'Plataforma eliminada' };
   }
+
+  @Delete(':id/delete-account')
+  async deleteUserAccount(@Param('id', ParseUUIDPipe) id: string) {
+    const result = await this.userProfileService.deleteUserAccount(id);
+
+    if (result.success) {
+      return {
+        success: true,
+        message: 'Cuenta eliminada con éxito',
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Error al eliminar la cuenta',
+        error: result.error,
+      };
+    }
+  }
 }

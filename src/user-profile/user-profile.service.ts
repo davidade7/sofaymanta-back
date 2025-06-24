@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UserProfile } from './entities/user-profile.entity';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
@@ -168,5 +173,55 @@ export class UserProfileService {
     await this.updateUserProfile(userId, {
       streaming_platforms: updatedPlatforms,
     });
+  }
+
+  async deleteUserAccount(
+    userId: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      // 1. Vérifier si l'utilisateur existe en utilisant la méthode existante
+      const userProfile = await this.getUserProfileOrThrow(userId);
+
+      // 2. Vérifier directement le rôle depuis la table UserProfiles
+      if (userProfile.role !== 'user') {
+        throw new ForbiddenException(
+          'Solo los usuarios con el rol "user" pueden eliminar su cuenta',
+        );
+      }
+
+      // 3. Anonymiser les données du profil en utilisant la méthode updateUserProfile existante
+      const anonymousUsername = `deleted_user_${Date.now().toString(36)}`;
+      await this.updateUserProfile(userId, {
+        username: anonymousUsername,
+        email: '',
+      });
+
+      // 4. Supprimer l'utilisateur de l'authentification
+      const { error: deleteAuthError }: { error: any } =
+        await this.supabaseService
+          .getAdminClient()
+          .auth.admin.deleteUser(userId);
+
+      if (deleteAuthError) {
+        throw new Error(
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          `Error al eliminar la autenticación: ${deleteAuthError.message}`,
+        );
+      }
+
+      return { success: true };
+    } catch (error) {
+      this.logger.error(
+        `Error al eliminar la cuenta del usuario ${userId}:`,
+        error,
+      );
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Error desconocido al eliminar la cuenta',
+      };
+    }
   }
 }
