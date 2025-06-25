@@ -369,4 +369,15 @@ export class UserMediaInteractionsService {
     if (error) throw error;
     return data || [];
   }
+
+  async getRatingsCount(): Promise<{ count: number }> {
+    const { count, error } = await this.supabaseService
+      .getClient()
+      .from('UserMediaInteractions')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) throw error;
+
+    return { count: count || 0 };
+  }
 }
