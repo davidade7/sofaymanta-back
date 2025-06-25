@@ -533,6 +533,41 @@ export class MediaService {
     }
   }
 
+  async getTvShowEpisodeCredits(
+    seriesId: number,
+    seasonNumber: number,
+    episodeNumber: number,
+    language: string = 'es-ES',
+  ): Promise<any> {
+    try {
+      const response = await axios.get(
+        `${this.apiUrl}/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}/credits`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: {
+            language: language,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        throw new HttpException(
+          `Crédits de l'épisode ${episodeNumber} de la saison ${seasonNumber} de la série avec l'ID ${seriesId} introuvables`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        `Erreur lors de la récupération des crédits de l'épisode: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async getPersonDetails(
     personId: number,
     language: string = 'es-ES',
