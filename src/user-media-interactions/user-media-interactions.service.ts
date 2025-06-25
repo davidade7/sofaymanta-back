@@ -344,4 +344,29 @@ export class UserMediaInteractionsService {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return data || [];
   }
+
+  async getHighRatedMedia(
+    minRating: number = 7,
+    mediaType?: 'movie' | 'tv',
+  ): Promise<UserMediaInteraction[]> {
+    let query = this.supabaseService
+      .getClient()
+      .from('UserMediaInteractions')
+      .select('*')
+      .gte('rating', minRating)
+      .is('season_number', null)
+      .is('episode_number', null)
+      .not('rating', 'is', null);
+
+    // Si un type de média spécifique est demandé
+    if (mediaType) {
+      query = query.eq('media_type', mediaType);
+    }
+
+    const { data, error }: { data: UserMediaInteraction[] | null; error: any } =
+      await query.order('rating', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
 }
