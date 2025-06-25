@@ -688,6 +688,10 @@ export class MediaService {
         minRating: number,
         mediaType: 'movie' | 'tv',
       ) => Promise<Array<{ media_id: number; media_type: string }>>;
+      getUserRatings: (
+        userId: string,
+        mediaType?: 'movie' | 'tv',
+      ) => Promise<Array<{ media_id: number; media_type: string }>>;
     },
     userProfileService: {
       getFavoriteGenres: (userId: string) => Promise<{
@@ -699,12 +703,22 @@ export class MediaService {
     mediaType: 'movie' | 'tv' = 'movie',
     language: string = 'es-ES',
     page: number = 1,
+    limit: number = 20,
   ): Promise<Movie[] | TvShow[]> {
     try {
       // 1. Récupérer les médias bien notés par l'utilisateur
       const highRatedMedia = await userInteractionsService.getHighRatedMedia(
         7,
         mediaType,
+      );
+
+      // 1.5. Récupérer TOUS les médias déjà évalués pour les exclure
+      const allUserRatings = await userInteractionsService.getUserRatings(
+        userId,
+        mediaType,
+      );
+      const excludedMediaIds = new Set(
+        allUserRatings.map((rating) => rating.media_id),
       );
 
       // 2. Récupérer les genres favoris de l'utilisateur
@@ -747,69 +761,88 @@ export class MediaService {
 
       if (sortedGenres.length === 0) {
         // Si pas de genres trouvés, utiliser les contenus populaires par défaut
-        return mediaType === 'movie'
-          ? this.getPopularMovies(language)
-          : this.getPopularTvShows(language);
+        const defaultResults =
+          mediaType === 'movie'
+            ? await this.getPopularMovies(language)
+            : await this.getPopularTvShows(language);
+
+        // Exclure les médias déjà évalués même dans les résultats par défaut
+        const filteredDefaults = defaultResults.filter(
+          (media) => !excludedMediaIds.has(media.id),
+        );
+        return filteredDefaults.slice(0, limit) as Movie[] | TvShow[];
       }
 
       // 6. Récupérer les plateformes de streaming de l'utilisateur
       const userPlatforms =
         await userProfileService.getUserStreamingPlatforms(userId);
 
-      // 7. Préparer les paramètres pour la découverte
-      const discoverParams: Record<string, any> = {
-        include_adult: false,
-        language: language,
-        page: page,
-        sort_by: 'vote_average.desc',
-        'vote_count.gte': mediaType === 'movie' ? 500 : 300,
-        with_genres: sortedGenres.join(','),
-      };
+      // 7. Récupérer plusieurs pages pour avoir plus de résultats
+      const allResults: (Movie | TvShow)[] = [];
+      const maxPages = Math.ceil(limit / 20) + 2; // +2 pages supplémentaires pour compenser les exclusions
 
-      // Paramètres spécifiques selon le type de média
-      if (mediaType === 'movie') {
-        discoverParams.include_video = false;
-        discoverParams['release_date.gte'] = '2010-01-01';
-      } else {
-        discoverParams['first_air_date.gte'] = '2010-01-01';
-      }
-
-      // Ajouter les plateformes de streaming si disponibles
-      if (userPlatforms.length > 0) {
-        // Mapper les codes de plateformes aux IDs TMDB
-        const platformMapping: Record<string, string> = {
-          netflix: '8',
-          'amazon-prime': '119',
-          'disney-plus': '337',
-          'hbo-max': '384',
-          'apple-tv': '350',
-          // Ajoutez d'autres mappings selon vos besoins
+      for (
+        let currentPage = page;
+        currentPage < page + maxPages;
+        currentPage++
+      ) {
+        // Préparer les paramètres pour la découverte
+        const discoverParams: Record<string, any> = {
+          include_adult: false,
+          language: language,
+          page: currentPage,
+          sort_by: 'vote_average.desc',
+          'vote_count.gte': mediaType === 'movie' ? 500 : 300,
+          with_genres: sortedGenres.join(','),
         };
 
-        const tmdbPlatformIds = userPlatforms
-          .map((platform) => platformMapping[platform])
-          .filter(Boolean);
+        // Paramètres spécifiques selon le type de média
+        if (mediaType === 'movie') {
+          discoverParams.include_video = false;
+          discoverParams['release_date.gte'] = '2010-01-01';
+        } else {
+          discoverParams['first_air_date.gte'] = '2010-01-01';
+        }
 
-        if (tmdbPlatformIds.length > 0) {
-          discoverParams['with_watch_providers'] = tmdbPlatformIds.join('|');
+        // Ajouter les plateformes de streaming si disponibles
+        if (userPlatforms.length > 0) {
+          discoverParams['with_watch_providers'] = userPlatforms.join('|');
           discoverParams['watch_region'] = 'ES'; // Ajustez selon votre région
+        }
+
+        // 8. Faire la requête de découverte
+        const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
+        const response = await axios.get<MovieResponse | TvShowResponse>(
+          `${this.apiUrl}/discover/${endpoint}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+              accept: 'application/json',
+            },
+            params: discoverParams,
+          },
+        );
+
+        // Filtrer les médias déjà évalués
+        const filteredResults = response.data.results.filter(
+          (media) => !excludedMediaIds.has(media.id),
+        );
+
+        allResults.push(...filteredResults);
+
+        // Arrêter si on a assez de résultats
+        if (allResults.length >= limit) {
+          break;
+        }
+
+        // Arrêter si on a atteint la dernière page
+        if (currentPage >= response.data.total_pages) {
+          break;
         }
       }
 
-      // 8. Faire la requête de découverte
-      const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
-      const response = await axios.get<MovieResponse | TvShowResponse>(
-        `${this.apiUrl}/discover/${endpoint}`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            accept: 'application/json',
-          },
-          params: discoverParams,
-        },
-      );
-
-      return response.data.results;
+      // Retourner le nombre demandé de résultats
+      return allResults.slice(0, limit) as Movie[] | TvShow[];
     } catch (error) {
       const axiosError = error as AxiosError;
       throw new HttpException(

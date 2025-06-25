@@ -129,6 +129,7 @@ export class MediaController {
     @Query('mediaType') mediaType: 'movie' | 'tv' = 'movie',
     @Query('lang') lang: string,
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
   ): Promise<any> {
     if (!userId) {
       throw new Error('userId is required');
@@ -141,6 +142,7 @@ export class MediaController {
       mediaType,
       lang || 'es-ES',
       page,
+      limit,
     );
   }
 
@@ -149,6 +151,7 @@ export class MediaController {
     @Query('userId') userId: string,
     @Query('lang') lang: string,
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
   ): Promise<any> {
     if (!userId) {
       throw new Error('userId is required');
@@ -161,6 +164,7 @@ export class MediaController {
       'movie',
       lang || 'es-ES',
       page,
+      limit,
     );
   }
 
@@ -169,6 +173,7 @@ export class MediaController {
     @Query('userId') userId: string,
     @Query('lang') lang: string,
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
   ): Promise<any> {
     if (!userId) {
       throw new Error('userId is required');
@@ -181,6 +186,7 @@ export class MediaController {
       'tv',
       lang || 'es-ES',
       page,
+      limit,
     );
   }
 }
