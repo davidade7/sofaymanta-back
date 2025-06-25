@@ -7,4 +7,9 @@ export class UpdateUserProfileDto extends PartialType(CreateUserProfileDto) {
   @MaxLength(100)
   @IsOptional()
   email?: string;
+
+  @IsString()
+  @MaxLength(50)
+  @IsOptional()
+  role?: string;
 }

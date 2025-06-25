@@ -211,6 +211,7 @@ export class UserProfileService {
       await this.updateUserProfile(userId, {
         username: anonymousUsername,
         email: '',
+        role: 'deleted',
       });
 
       // 4. Supprimer l'utilisateur de l'authentification
