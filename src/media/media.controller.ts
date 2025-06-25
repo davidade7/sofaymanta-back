@@ -1,10 +1,16 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ParseIntPipe } from '@nestjs/common';
 import { MediaService } from './media.service';
+import { UserMediaInteractionsService } from '../user-media-interactions/user-media-interactions.service';
+import { UserProfileService } from '../user-profile/user-profile.service';
 
 @Controller('media')
 export class MediaController {
-  constructor(private readonly mediaService: MediaService) {}
+  constructor(
+    private readonly mediaService: MediaService,
+    private readonly userMediaInteractionsService: UserMediaInteractionsService,
+    private readonly userProfileService: UserProfileService,
+  ) {}
 
   @Get('search')
   async searchMultimedia(
@@ -115,5 +121,66 @@ export class MediaController {
     @Query('lang') lang: string,
   ): Promise<any> {
     return this.mediaService.getPersonCredits(id, lang || 'es-ES');
+  }
+
+  @Get('recommendations')
+  async getPersonalizedRecommendations(
+    @Query('userId') userId: string,
+    @Query('mediaType') mediaType: 'movie' | 'tv' = 'movie',
+    @Query('lang') lang: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+  ): Promise<any> {
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+
+    return this.mediaService.getPersonalizedRecommendations(
+      userId,
+      this.userMediaInteractionsService,
+      this.userProfileService,
+      mediaType,
+      lang || 'es-ES',
+      page,
+    );
+  }
+
+  @Get('recommendations/movies')
+  async getPersonalizedMovieRecommendations(
+    @Query('userId') userId: string,
+    @Query('lang') lang: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+  ): Promise<any> {
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+
+    return this.mediaService.getPersonalizedRecommendations(
+      userId,
+      this.userMediaInteractionsService,
+      this.userProfileService,
+      'movie',
+      lang || 'es-ES',
+      page,
+    );
+  }
+
+  @Get('recommendations/tv')
+  async getPersonalizedTvRecommendations(
+    @Query('userId') userId: string,
+    @Query('lang') lang: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+  ): Promise<any> {
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+
+    return this.mediaService.getPersonalizedRecommendations(
+      userId,
+      this.userMediaInteractionsService,
+      this.userProfileService,
+      'tv',
+      lang || 'es-ES',
+      page,
+    );
   }
 }

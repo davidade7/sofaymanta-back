@@ -680,4 +680,142 @@ export class MediaService {
       );
     }
   }
+
+  async getPersonalizedRecommendations(
+    userId: string,
+    userInteractionsService: {
+      getHighRatedMedia: (
+        minRating: number,
+        mediaType: 'movie' | 'tv',
+      ) => Promise<Array<{ media_id: number; media_type: string }>>;
+    },
+    userProfileService: {
+      getFavoriteGenres: (userId: string) => Promise<{
+        movie_genres: number[];
+        tv_genres: number[];
+      }>;
+      getUserStreamingPlatforms: (userId: string) => Promise<string[]>;
+    },
+    mediaType: 'movie' | 'tv' = 'movie',
+    language: string = 'es-ES',
+    page: number = 1,
+  ): Promise<Movie[] | TvShow[]> {
+    try {
+      // 1. Récupérer les médias bien notés par l'utilisateur
+      const highRatedMedia = await userInteractionsService.getHighRatedMedia(
+        7,
+        mediaType,
+      );
+
+      // 2. Récupérer les genres favoris de l'utilisateur
+      const favoriteGenres = await userProfileService.getFavoriteGenres(userId);
+      const userFavoriteGenres =
+        mediaType === 'movie'
+          ? favoriteGenres.movie_genres || []
+          : favoriteGenres.tv_genres || [];
+
+      // 3. Analyser les genres des médias bien notés
+      const genreCounter: Record<number, number> = {};
+
+      // Compter les genres des médias bien notés
+      for (const media of highRatedMedia) {
+        try {
+          const mediaGenres = await this.getMediaGenres(
+            media.media_id,
+            mediaType,
+            language,
+          );
+          for (const genre of mediaGenres) {
+            genreCounter[genre.id] = (genreCounter[genre.id] || 0) + 1;
+          }
+        } catch {
+          // Ignorer les erreurs pour des médias spécifiques
+          continue;
+        }
+      }
+
+      // 4. Combiner avec les genres favoris (leur donner plus de poids)
+      for (const genreId of userFavoriteGenres) {
+        genreCounter[genreId] = (genreCounter[genreId] || 0) + 3; // Poids plus élevé
+      }
+
+      // 5. Récupérer les 2 genres les plus populaires
+      const sortedGenres = Object.entries(genreCounter)
+        .sort(([, countA], [, countB]) => countB - countA)
+        .slice(0, 2)
+        .map(([genreId]) => parseInt(genreId));
+
+      if (sortedGenres.length === 0) {
+        // Si pas de genres trouvés, utiliser les contenus populaires par défaut
+        return mediaType === 'movie'
+          ? this.getPopularMovies(language)
+          : this.getPopularTvShows(language);
+      }
+
+      // 6. Récupérer les plateformes de streaming de l'utilisateur
+      const userPlatforms =
+        await userProfileService.getUserStreamingPlatforms(userId);
+
+      // 7. Préparer les paramètres pour la découverte
+      const discoverParams: Record<string, any> = {
+        include_adult: false,
+        language: language,
+        page: page,
+        sort_by: 'vote_average.desc',
+        'vote_count.gte': mediaType === 'movie' ? 500 : 300,
+        with_genres: sortedGenres.join(','),
+      };
+
+      // Paramètres spécifiques selon le type de média
+      if (mediaType === 'movie') {
+        discoverParams.include_video = false;
+        discoverParams['release_date.gte'] = '2010-01-01';
+      } else {
+        discoverParams['first_air_date.gte'] = '2010-01-01';
+      }
+
+      // Ajouter les plateformes de streaming si disponibles
+      if (userPlatforms.length > 0) {
+        // Mapper les codes de plateformes aux IDs TMDB
+        const platformMapping: Record<string, string> = {
+          netflix: '8',
+          'amazon-prime': '119',
+          'disney-plus': '337',
+          'hbo-max': '384',
+          'apple-tv': '350',
+          // Ajoutez d'autres mappings selon vos besoins
+        };
+
+        const tmdbPlatformIds = userPlatforms
+          .map((platform) => platformMapping[platform])
+          .filter(Boolean);
+
+        if (tmdbPlatformIds.length > 0) {
+          discoverParams['with_watch_providers'] = tmdbPlatformIds.join('|');
+          discoverParams['watch_region'] = 'ES'; // Ajustez selon votre région
+        }
+      }
+
+      // 8. Faire la requête de découverte
+      const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
+      const response = await axios.get<MovieResponse | TvShowResponse>(
+        `${this.apiUrl}/discover/${endpoint}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            accept: 'application/json',
+          },
+          params: discoverParams,
+        },
+      );
+
+      return response.data.results;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new HttpException(
+        `Erreur lors de la récupération des recommandations personnalisées: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
