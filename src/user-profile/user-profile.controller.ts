@@ -23,6 +23,11 @@ export class UserProfileController {
 
   constructor(private readonly userProfileService: UserProfileService) {}
 
+  @Get('count')
+  async getUserCount() {
+    return this.userProfileService.getUserCount();
+  }
+
   @Post('webhook/create')
   @HttpCode(HttpStatus.CREATED)
   async createFromWebhook(@Body() webhookData: WebhookUserDto) {

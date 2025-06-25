@@ -241,4 +241,24 @@ export class UserProfileService {
       };
     }
   }
+
+  async getUserCount(): Promise<{ count: number }> {
+    try {
+      const { count, error } = await this.supabaseService
+        .getClient()
+        .from('UserProfiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'user');
+
+      if (error) {
+        this.logger.error('Error counting users:', error);
+        throw error;
+      }
+
+      return { count: count || 0 };
+    } catch (error) {
+      this.logger.error('Failed to count users:', error);
+      throw error;
+    }
+  }
 }
