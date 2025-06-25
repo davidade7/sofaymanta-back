@@ -645,4 +645,39 @@ export class MediaService {
     }
     return shuffled;
   }
+
+  async getMediaGenres(
+    mediaId: number,
+    mediaType: 'movie' | 'tv',
+    language: string = 'es-ES',
+  ): Promise<Array<{ id: number; name: string }>> {
+    try {
+      const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
+      const response = await axios.get<{
+        genres: Array<{ id: number; name: string }>;
+      }>(`${this.apiUrl}/${endpoint}/${mediaId}`, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          accept: 'application/json',
+        },
+        params: {
+          language: language,
+        },
+      });
+
+      return response.data.genres || [];
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        throw new HttpException(
+          `${mediaType === 'movie' ? 'Film' : 'Série'} avec l'ID ${mediaId} introuvable`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        `Erreur lors de la récupération des genres du ${mediaType === 'movie' ? 'film' : 'série'}: ${axiosError.message || 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
