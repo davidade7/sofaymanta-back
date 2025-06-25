@@ -187,6 +187,11 @@ export class UserProfileService {
     };
   }
 
+  async getUserStreamingPlatforms(userId: string): Promise<string[]> {
+    const profile = await this.getUserProfileOrThrow(userId);
+    return profile.streaming_platforms || [];
+  }
+
   async deleteUserAccount(
     userId: string,
   ): Promise<{ success: boolean; error?: string }> {
