@@ -175,6 +175,18 @@ export class UserProfileService {
     });
   }
 
+  async getFavoriteGenres(userId: string): Promise<{
+    movie_genres: number[];
+    tv_genres: number[];
+  }> {
+    const profile = await this.getUserProfileOrThrow(userId);
+
+    return {
+      movie_genres: profile.favorite_movie_genres || [],
+      tv_genres: profile.favorite_tv_genres || [],
+    };
+  }
+
   async deleteUserAccount(
     userId: string,
   ): Promise<{ success: boolean; error?: string }> {
