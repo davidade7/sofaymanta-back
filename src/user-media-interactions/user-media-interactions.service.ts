@@ -5,13 +5,17 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
+import { MediaService } from '../media/media.service';
 import { CreateUserMediaInteractionDto } from './dto/create-user-media-interaction.dto';
 import { UpdateUserMediaInteractionDto } from './dto/update-user-media-interaction.dto';
 import { UserMediaInteraction } from './entities/user-media-interaction.entity';
 
 @Injectable()
 export class UserMediaInteractionsService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private mediaService: MediaService,
+  ) {}
 
   async create(
     userId: string,
@@ -369,14 +373,93 @@ export class UserMediaInteractionsService {
     return data || [];
   }
 
-  async getRatingsCount(): Promise<{ count: number }> {
-    const { count, error } = await this.supabaseService
+  async getAllRatings(): Promise<
+    Array<
+      UserMediaInteraction & {
+        username?: string;
+        media_title?: string;
+        media_poster?: string;
+      }
+    >
+  > {
+    const { data, error } = await this.supabaseService
       .getClient()
       .from('UserMediaInteractions')
-      .select('*', { count: 'exact', head: true });
+      .select(
+        `
+        *,
+        UserProfiles:user_id (
+          username
+        )
+      `,
+      )
+      .not('rating', 'is', null)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    return { count: count || 0 };
+    const ratings = data || [];
+
+    // Procesar cada rating para agregar información del username y media
+    for (const rating of ratings) {
+      // Agregar username desde el join
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      rating.username = rating.UserProfiles?.username || 'Usuario desconocido';
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      delete rating.UserProfiles;
+
+      // Obtener información del media desde TMDB
+      try {
+        const mediaInfo = await this.getMediaInfoFromTMDB(
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          rating.media_id as number,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          rating.media_type as 'movie' | 'tv',
+        );
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        rating.media_title = mediaInfo.title;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        rating.media_poster = mediaInfo.poster_path;
+      } catch {
+        // Si falla la llamada a TMDB, usar valores por defecto
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        rating.media_title = `${rating.media_type as string} #${rating.media_id as number}`;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        rating.media_poster = null;
+      }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return ratings;
+  }
+
+  private async getMediaInfoFromTMDB(
+    mediaId: number,
+    mediaType: 'movie' | 'tv',
+  ): Promise<{ title: string; poster_path: string | null }> {
+    try {
+      if (mediaType === 'movie') {
+        const movieDetails = await this.mediaService.getMovieDetails(mediaId);
+        return {
+          title: movieDetails.title,
+          poster_path: movieDetails.poster_path || null,
+        };
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const tvDetails = await this.mediaService.getTvShowDetails(mediaId);
+        return {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          title: tvDetails.name || tvDetails.title,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          poster_path: tvDetails.poster_path || null,
+        };
+      }
+    } catch {
+      // Si falla, devolver información básica
+      return {
+        title: `${mediaType} #${mediaId}`,
+        poster_path: null,
+      };
+    }
   }
 }

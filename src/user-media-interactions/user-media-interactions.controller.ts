@@ -20,11 +20,6 @@ export class UserMediaInteractionsController {
     private readonly userMediaInteractionsService: UserMediaInteractionsService,
   ) {}
 
-  @Get('ratings/count')
-  async getRatingsCount() {
-    return this.userMediaInteractionsService.getRatingsCount();
-  }
-
   @Post(':userId')
   async create(
     @Param('userId', ParseUUIDPipe) userId: string,
@@ -141,5 +136,10 @@ export class UserMediaInteractionsController {
     @Param('userId', ParseUUIDPipe) userId: string,
   ) {
     return this.userMediaInteractionsService.remove(id, userId);
+  }
+
+  @Get('all-ratings')
+  async getAllRatings() {
+    return this.userMediaInteractionsService.getAllRatings();
   }
 }
