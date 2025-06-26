@@ -262,4 +262,26 @@ export class UserProfileService {
       throw error;
     }
   }
+
+  async getAllUsers(): Promise<UserProfile[]> {
+    try {
+      const { data, error }: { data: UserProfile[] | null; error: any } =
+        await this.supabaseService
+          .getClient()
+          .from('UserProfiles')
+          .select('id, created_at, updated_at, email, username, role')
+          .eq('role', 'user')
+          .order('created_at', { ascending: false });
+
+      if (error) {
+        this.logger.error('Error fetching users:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      this.logger.error('Failed to fetch users:', error);
+      throw error;
+    }
+  }
 }

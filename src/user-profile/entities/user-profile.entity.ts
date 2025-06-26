@@ -1,6 +1,7 @@
 export class UserProfile {
   id: string;
   email: string;
+  username?: string;
   role: 'user' | 'admin';
   display_name?: string;
   favorite_movie_genres?: number[];
