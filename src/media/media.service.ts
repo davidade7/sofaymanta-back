@@ -41,7 +41,7 @@ interface MovieDetails {
 
 interface TvShow {
   id: number;
-  name: string; // Note: 'name' pour les séries, pas 'title'
+  name: string;
   overview: string;
   first_air_date: string;
   poster_path?: string;
@@ -203,12 +203,12 @@ export class MediaService {
             query: query,
             include_adult: false,
             language: language,
-            page: 1, // Limiter à la première page pour éviter trop de résultats
+            page: 1, // Limitar a la primera página para evitar demasiados resultados
           },
         },
       );
 
-      // Vérifier que les résultats sont conformes aux types attendus
+      // Verificar que los resultados cumplan con los tipos esperados
       return response.data.results.filter(
         (result) =>
           result.media_type === 'movie' ||
@@ -218,7 +218,7 @@ export class MediaService {
     } catch (error) {
       const axiosError = error as AxiosError;
       throw new HttpException(
-        `Erreur lors de la recherche multimédia: ${axiosError.message || 'Unknown error'}`,
+        `Error al buscar multimedia: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -240,8 +240,8 @@ export class MediaService {
             page: 1,
             sort_by: 'popularity.desc',
             with_release_type: '2|3',
-            'release_date.gte': this.getDateString(-30), // 30 jours en arrière
-            'release_date.lte': this.getDateString(30), // 30 jours en avant
+            'release_date.gte': this.getDateString(-30), // 30 días atrás
+            'release_date.lte': this.getDateString(30), // 30 días adelante
           },
         },
       );
@@ -249,7 +249,7 @@ export class MediaService {
     } catch (error) {
       const axiosError = error as AxiosError;
       throw new HttpException(
-        `Erreur lors de la récupération des films: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar las películas: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -276,7 +276,7 @@ export class MediaService {
     } catch (error) {
       const axiosError = error as AxiosError;
 
-      console.error('API Error:', {
+      console.error('Error de API:', {
         status: axiosError.response?.status,
         statusText: axiosError.response?.statusText,
         data: axiosError.response?.data,
@@ -285,13 +285,13 @@ export class MediaService {
 
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `Film avec l'ID ${movieId} introuvable`,
+          `Película con ID ${movieId} no encontrada`,
           HttpStatus.NOT_FOUND,
         );
       }
 
       throw new HttpException(
-        `Erreur lors de la récupération des détails du film: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los detalles de la película: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -299,7 +299,7 @@ export class MediaService {
 
   async getPopularMovies(language: string = 'es-ES'): Promise<Movie[]> {
     try {
-      // Récupérer les 100 films les mieux notés (5 pages de 20 films)
+      // Recuperar las 100 películas mejor calificadas (5 páginas de 20 películas)
       const allMovies: Movie[] = [];
 
       for (let page = 1; page <= 5; page++) {
@@ -316,21 +316,21 @@ export class MediaService {
               language: language,
               page: page,
               sort_by: 'vote_average.desc',
-              'vote_count.gte': 1000, // Minimum de votes pour éviter les films obscurs
-              'release_date.gte': '2000-01-01', // Films depuis 2000 pour la pertinence
+              'vote_count.gte': 1000, // Mínimo de votos para evitar películas oscuras
+              'release_date.gte': '2000-01-01', // Películas desde 2000 para relevancia
             },
           },
         );
         allMovies.push(...response.data.results);
       }
 
-      // Mélanger le tableau et retourner 30 films au hasard
+      // Mezclar el array y devolver 30 películas al azar
       const shuffledMovies = this.shuffleArray([...allMovies]);
       return shuffledMovies.slice(0, 30);
     } catch (error) {
       const axiosError = error as AxiosError;
       throw new HttpException(
-        `Erreur lors de la récupération des films populaires: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar las películas populares: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -358,12 +358,12 @@ export class MediaService {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `Film avec l'ID ${movieId} introuvable`,
+          `Película con ID ${movieId} no encontrada`,
           HttpStatus.NOT_FOUND,
         );
       }
       throw new HttpException(
-        `Erreur lors de la récupération des crédits du film: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los créditos de la película: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -388,7 +388,7 @@ export class MediaService {
     } catch (error) {
       const axiosError = error as AxiosError;
       throw new HttpException(
-        `Erreur lors de la récupération des séries: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar las series: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -396,7 +396,7 @@ export class MediaService {
 
   async getPopularTvShows(language: string = 'es-ES'): Promise<TvShow[]> {
     try {
-      // Récupérer les 100 séries les mieux notées (5 pages de 20 séries)
+      // Recuperar las 100 series mejor calificadas (5 páginas de 20 series)
       const allTvShows: TvShow[] = [];
 
       for (let page = 1; page <= 5; page++) {
@@ -412,21 +412,21 @@ export class MediaService {
               language: language,
               page: page,
               sort_by: 'vote_average.desc',
-              'vote_count.gte': 500, // Minimum de votes pour éviter les séries obscures
-              'first_air_date.gte': '2000-01-01', // Séries depuis 2000 pour la pertinence
+              'vote_count.gte': 500, // Mínimo de votos para evitar series oscuras
+              'first_air_date.gte': '2000-01-01', // Series desde 2000 para relevancia
             },
           },
         );
         allTvShows.push(...response.data.results);
       }
 
-      // Mélanger le tableau et retourner 30 séries au hasard
+      // Mezclar el array y devolver 30 series al azar
       const shuffledTvShows = this.shuffleArray([...allTvShows]);
       return shuffledTvShows.slice(0, 30);
     } catch (error) {
       const axiosError = error as AxiosError;
       throw new HttpException(
-        `Erreur lors de la récupération des séries populaires: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar las series populares: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -452,13 +452,13 @@ export class MediaService {
 
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `Série avec l'ID ${tvId} introuvable`,
+          `Serie con ID ${tvId} no encontrada`,
           HttpStatus.NOT_FOUND,
         );
       }
 
       throw new HttpException(
-        `Erreur lors de la récupération des détails de la série: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los detalles de la serie: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -487,12 +487,12 @@ export class MediaService {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `Saison ${seasonNumber} de la série avec l'ID ${serieId} introuvable`,
+          `Temporada ${seasonNumber} de la serie con ID ${serieId} no encontrada`,
           HttpStatus.NOT_FOUND,
         );
       }
       throw new HttpException(
-        `Erreur lors de la récupération des détails de la saison: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los detalles de la temporada: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -522,12 +522,12 @@ export class MediaService {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `Épisode ${episodeNumber} de la saison ${seasonNumber} de la série avec l'ID ${seriesId} introuvable`,
+          `Episodio ${episodeNumber} de la temporada ${seasonNumber} de la serie con ID ${seriesId} no encontrado`,
           HttpStatus.NOT_FOUND,
         );
       }
       throw new HttpException(
-        `Erreur lors de la récupération des détails de l'épisode: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los detalles del episodio: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -557,12 +557,12 @@ export class MediaService {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `Crédits de l'épisode ${episodeNumber} de la saison ${seasonNumber} de la série avec l'ID ${seriesId} introuvables`,
+          `Créditos del episodio ${episodeNumber} de la temporada ${seasonNumber} de la serie con ID ${seriesId} no encontrados`,
           HttpStatus.NOT_FOUND,
         );
       }
       throw new HttpException(
-        `Erreur lors de la récupération des crédits de l'épisode: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los créditos del episodio: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -587,12 +587,12 @@ export class MediaService {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `Personne avec l'ID ${personId} introuvable`,
+          `Persona con ID ${personId} no encontrada`,
           HttpStatus.NOT_FOUND,
         );
       }
       throw new HttpException(
-        `Erreur lors de la récupération des détails de la personne: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los detalles de la persona: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -620,12 +620,12 @@ export class MediaService {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `Personne avec l'ID ${personId} introuvable`,
+          `Persona con ID ${personId} no encontrada`,
           HttpStatus.NOT_FOUND,
         );
       }
       throw new HttpException(
-        `Erreur lors de la récupération des crédits de la personne: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los créditos de la persona: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -670,12 +670,12 @@ export class MediaService {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
         throw new HttpException(
-          `${mediaType === 'movie' ? 'Film' : 'Série'} avec l'ID ${mediaId} introuvable`,
+          `${mediaType === 'movie' ? 'Película' : 'Serie'} con ID ${mediaId} no encontrada`,
           HttpStatus.NOT_FOUND,
         );
       }
       throw new HttpException(
-        `Erreur lors de la récupération des genres du ${mediaType === 'movie' ? 'film' : 'série'}: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar los géneros de la ${mediaType === 'movie' ? 'película' : 'serie'}: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -706,13 +706,13 @@ export class MediaService {
     limit: number = 20,
   ): Promise<Movie[] | TvShow[]> {
     try {
-      // 1. Récupérer les médias bien notés par l'utilisateur
+      // 1. Recuperar los medios bien calificados por el usuario
       const highRatedMedia = await userInteractionsService.getHighRatedMedia(
         7,
         mediaType,
       );
 
-      // 1.5. Récupérer TOUS les médias déjà évalués pour les exclure
+      // 1.5. Recuperar TODOS los medios ya evaluados para excluirlos
       const allUserRatings = await userInteractionsService.getUserRatings(
         userId,
         mediaType,
@@ -721,17 +721,17 @@ export class MediaService {
         allUserRatings.map((rating) => rating.media_id),
       );
 
-      // 2. Récupérer les genres favoris de l'utilisateur
+      // 2. Recuperar los géneros favoritos del usuario
       const favoriteGenres = await userProfileService.getFavoriteGenres(userId);
       const userFavoriteGenres =
         mediaType === 'movie'
           ? favoriteGenres.movie_genres || []
           : favoriteGenres.tv_genres || [];
 
-      // 3. Analyser les genres des médias bien notés
+      // 3. Analizar los géneros de los medios bien calificados
       const genreCounter: Record<number, number> = {};
 
-      // Compter les genres des médias bien notés
+      // Contar los géneros de los medios bien calificados
       for (const media of highRatedMedia) {
         try {
           const mediaGenres = await this.getMediaGenres(
@@ -743,50 +743,50 @@ export class MediaService {
             genreCounter[genre.id] = (genreCounter[genre.id] || 0) + 1;
           }
         } catch {
-          // Ignorer les erreurs pour des médias spécifiques
+          // Ignorar errores para medios específicos
           continue;
         }
       }
 
-      // 4. Combiner avec les genres favoris (leur donner plus de poids)
+      // 4. Combinar con los géneros favoritos (darles más peso)
       for (const genreId of userFavoriteGenres) {
-        genreCounter[genreId] = (genreCounter[genreId] || 0) + 3; // Poids plus élevé
+        genreCounter[genreId] = (genreCounter[genreId] || 0) + 3; // Peso más alto
       }
 
-      // 5. Récupérer les 2 genres les plus populaires
+      // 5. Recuperar los 2 géneros más populares
       const sortedGenres = Object.entries(genreCounter)
         .sort(([, countA], [, countB]) => countB - countA)
         .slice(0, 2)
         .map(([genreId]) => parseInt(genreId));
 
       if (sortedGenres.length === 0) {
-        // Si pas de genres trouvés, utiliser les contenus populaires par défaut
+        // Si no se encuentran géneros, usar contenido popular por defecto
         const defaultResults =
           mediaType === 'movie'
             ? await this.getPopularMovies(language)
             : await this.getPopularTvShows(language);
 
-        // Exclure les médias déjà évalués même dans les résultats par défaut
+        // Excluir medios ya evaluados incluso en resultados por defecto
         const filteredDefaults = defaultResults.filter(
           (media) => !excludedMediaIds.has(media.id),
         );
         return filteredDefaults.slice(0, limit) as Movie[] | TvShow[];
       }
 
-      // 6. Récupérer les plateformes de streaming de l'utilisateur
+      // 6. Recuperar las plataformas de streaming del usuario
       const userPlatforms =
         await userProfileService.getUserStreamingPlatforms(userId);
 
-      // 7. Récupérer plusieurs pages pour avoir plus de résultats
+      // 7. Recuperar varias páginas para tener más resultados
       const allResults: (Movie | TvShow)[] = [];
-      const maxPages = Math.ceil(limit / 20) + 2; // +2 pages supplémentaires pour compenser les exclusions
+      const maxPages = Math.ceil(limit / 20) + 2; // +2 páginas adicionales para compensar exclusiones
 
       for (
         let currentPage = page;
         currentPage < page + maxPages;
         currentPage++
       ) {
-        // Préparer les paramètres pour la découverte
+        // Preparar los parámetros para el descubrimiento
         const discoverParams: Record<string, any> = {
           include_adult: false,
           language: language,
@@ -796,7 +796,7 @@ export class MediaService {
           with_genres: sortedGenres.join(','),
         };
 
-        // Paramètres spécifiques selon le type de média
+        // Parámetros específicos según el tipo de medio
         if (mediaType === 'movie') {
           discoverParams.include_video = false;
           discoverParams['release_date.gte'] = '2010-01-01';
@@ -804,13 +804,13 @@ export class MediaService {
           discoverParams['first_air_date.gte'] = '2010-01-01';
         }
 
-        // Ajouter les plateformes de streaming si disponibles
+        // Agregar plataformas de streaming si están disponibles
         if (userPlatforms.length > 0) {
           discoverParams['with_watch_providers'] = userPlatforms.join('|');
-          discoverParams['watch_region'] = 'ES'; // Ajustez selon votre région
+          discoverParams['watch_region'] = 'ES'; // Ajustar según tu región
         }
 
-        // 8. Faire la requête de découverte
+        // 8. Hacer la petición de descubrimiento
         const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
         const response = await axios.get<MovieResponse | TvShowResponse>(
           `${this.apiUrl}/discover/${endpoint}`,
@@ -823,30 +823,30 @@ export class MediaService {
           },
         );
 
-        // Filtrer les médias déjà évalués
+        // Filtrar medios ya evaluados
         const filteredResults = response.data.results.filter(
           (media) => !excludedMediaIds.has(media.id),
         );
 
         allResults.push(...filteredResults);
 
-        // Arrêter si on a assez de résultats
+        // Parar si tenemos suficientes resultados
         if (allResults.length >= limit) {
           break;
         }
 
-        // Arrêter si on a atteint la dernière page
+        // Parar si hemos llegado a la última página
         if (currentPage >= response.data.total_pages) {
           break;
         }
       }
 
-      // Retourner le nombre demandé de résultats
+      // Devolver el número solicitado de resultados
       return allResults.slice(0, limit) as Movie[] | TvShow[];
     } catch (error) {
       const axiosError = error as AxiosError;
       throw new HttpException(
-        `Erreur lors de la récupération des recommandations personnalisées: ${axiosError.message || 'Unknown error'}`,
+        `Error al recuperar las recomendaciones personalizadas: ${axiosError.message || 'Error desconocido'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
