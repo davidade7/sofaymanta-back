@@ -400,6 +400,8 @@ export class UserMediaInteractionsService {
 
     const ratings = data || [];
 
+    console.log(ratings);
+
     // Procesar cada rating para agregar información del username y media
     for (const rating of ratings) {
       // Agregar username desde el join
@@ -429,6 +431,7 @@ export class UserMediaInteractionsService {
       }
     }
 
+    console.log(ratings);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return ratings;
   }
