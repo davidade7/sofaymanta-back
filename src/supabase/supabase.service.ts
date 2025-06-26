@@ -18,7 +18,7 @@ export class SupabaseService {
 
     if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
       throw new Error(
-        "Variables d'environnement Supabase manquantes. Vérifiez votre fichier .env",
+        'Variables de entorno de Supabase faltantes. Verifica tu archivo .env',
       );
     }
 
@@ -26,12 +26,12 @@ export class SupabaseService {
     this.adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
   }
 
-  // Client pour les requêtes côté client (authentification standard)
+  // Cliente para las consultas del lado del cliente (autenticación estándar)
   getClient() {
     return this.supabase;
   }
 
-  // Client admin avec des privilèges élevés (pour les opérations administratives)
+  // Cliente admin con privilegios elevados (para operaciones administrativas)
   getAdminClient() {
     return this.adminSupabase;
   }
