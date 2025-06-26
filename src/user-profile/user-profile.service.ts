@@ -16,7 +16,7 @@ export class UserProfileService {
 
   async createFromWebhook(id: string, email: string): Promise<UserProfile> {
     try {
-      // Vérifier si le profil existe déjà
+      // Verificar si el perfil ya existe
       const existingProfile = await this.getUserProfile(id);
       if (existingProfile) {
         return existingProfile;
@@ -81,7 +81,7 @@ export class UserProfileService {
     const profile = await this.getUserProfile(userId);
     if (!profile) {
       throw new NotFoundException(
-        `Profil utilisateur avec l'ID ${userId} introuvable`,
+        `Perfil de usuario con ID ${userId} no encontrado`,
       );
     }
     return profile;
@@ -110,7 +110,7 @@ export class UserProfileService {
 
     if (!data) {
       throw new NotFoundException(
-        `Profil utilisateur avec l'ID ${userId} introuvable`,
+        `Perfil de usuario con ID ${userId} no encontrado`,
       );
     }
 
@@ -128,7 +128,7 @@ export class UserProfileService {
       mediaType === 'movie' ? 'favorite_movie_genres' : 'favorite_tv_genres';
     const currentGenres = profile[genreField] || [];
 
-    // Ajouter le genre s'il n'existe pas déjà
+    // Agregar el género si no existe ya
     if (!currentGenres.includes(genreId)) {
       const updatedGenres = [...currentGenres, genreId];
       await this.updateUserProfile(userId, { [genreField]: updatedGenres });
@@ -196,17 +196,17 @@ export class UserProfileService {
     userId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      // 1. Vérifier si l'utilisateur existe en utilisant la méthode existante
+      // 1. Verificar si el usuario existe usando el método existente
       const userProfile = await this.getUserProfileOrThrow(userId);
 
-      // 2. Vérifier directement le rôle depuis la table UserProfiles
+      // 2. Verificar directamente el rol desde la tabla UserProfiles
       if (userProfile.role !== 'user') {
         throw new ForbiddenException(
           'Solo los usuarios con el rol "user" pueden eliminar su cuenta',
         );
       }
 
-      // 3. Anonymiser les données du profil en utilisant la méthode updateUserProfile existante
+      // 3. Anonimizar los datos del perfil usando el método updateUserProfile existente
       const anonymousUsername = `deleted_user_${Date.now().toString(36)}`;
       await this.updateUserProfile(userId, {
         username: anonymousUsername,
@@ -214,7 +214,7 @@ export class UserProfileService {
         role: 'deleted',
       });
 
-      // 4. Supprimer l'utilisateur de l'authentification
+      // 4. Eliminar el usuario de la autenticación
       const { error: deleteAuthError }: { error: any } =
         await this.supabaseService
           .getAdminClient()

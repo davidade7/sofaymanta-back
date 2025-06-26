@@ -65,7 +65,6 @@ export class UserProfileController {
     return this.userProfileService.getUserProfileOrThrow(id);
   }
 
-  // Seule route de modification nécessaire
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,

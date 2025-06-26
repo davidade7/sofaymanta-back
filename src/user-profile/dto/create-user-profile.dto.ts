@@ -4,9 +4,7 @@ import {
   MaxLength,
   IsArray,
   IsNumber,
-  IsIn,
 } from 'class-validator';
-import { STREAMING_PLATFORM_LIST } from '../../common/constants/streaming-platforms';
 
 export class CreateUserProfileDto {
   @IsString()
@@ -26,7 +24,6 @@ export class CreateUserProfileDto {
 
   @IsArray()
   @IsString({ each: true })
-  @IsIn(STREAMING_PLATFORM_LIST, { each: true })
   @IsOptional()
   streaming_platforms?: string[];
 }
