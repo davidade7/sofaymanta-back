@@ -23,9 +23,9 @@ export class UserProfileController {
 
   constructor(private readonly userProfileService: UserProfileService) {}
 
-  @Get('count')
-  async getUserCount() {
-    return this.userProfileService.getUserCount();
+  @Get('allUsers')
+  async getAllUsers() {
+    return this.userProfileService.getAllUsers();
   }
 
   @Post('webhook/create')
