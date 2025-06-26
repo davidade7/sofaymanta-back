@@ -23,7 +23,7 @@ export class UserProfileController {
 
   constructor(private readonly userProfileService: UserProfileService) {}
 
-  @Get('allUsers')
+  @Get('all-users')
   async getAllUsers() {
     return this.userProfileService.getAllUsers();
   }
