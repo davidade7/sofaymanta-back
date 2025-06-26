@@ -17,10 +17,10 @@ export class UserMediaInteractionsService {
     userId: string,
     createDto: CreateUserMediaInteractionDto,
   ): Promise<UserMediaInteraction> {
-    // Validation pour les épisodes
+    // Validación para los episodios
     this.validateEpisodeData(createDto);
 
-    // Vérifier si une interaction existe déjà - utiliser la méthode détaillée
+    // Verificar si ya existe una interacción - usar el método detallado
     const existingInteraction = await this.findByUserAndMediaDetails(
       userId,
       createDto.media_id,
@@ -31,7 +31,7 @@ export class UserMediaInteractionsService {
 
     if (existingInteraction) {
       throw new ConflictException(
-        'Une interaction existe déjà pour ce contenu',
+        'Ya existe una interacción para este contenido',
       );
     }
 
@@ -58,19 +58,19 @@ export class UserMediaInteractionsService {
   }
 
   private validateEpisodeData(dto: CreateUserMediaInteractionDto): void {
-    // Pour les films, pas de saison/épisode
+    // Para las películas, no hay temporadas/episodios
     if (dto.media_type === 'movie') {
       if (dto.season_number || dto.episode_number) {
         throw new BadRequestException(
-          "Les films ne peuvent pas avoir de saisons ou d'épisodes",
+          'Las películas no pueden tener temporadas o episodios',
         );
       }
     }
 
-    // Pour les séries avec épisodes, saison obligatoire
+    // Para las series con episodios, temporada obligatoria
     if (dto.media_type === 'tv' && dto.episode_number && !dto.season_number) {
       throw new BadRequestException(
-        'Le numéro de saison est requis pour les épisodes',
+        'El número de temporada es requerido para los episodios',
       );
     }
   }
@@ -103,7 +103,7 @@ export class UserMediaInteractionsService {
       .eq('media_id', mediaId)
       .eq('media_type', mediaType);
 
-    // Gestion des saisons et épisodes
+    // Gestión de las temporadas y episodios
     if (seasonNumber !== undefined) {
       query = query.eq('season_number', seasonNumber);
     } else {
@@ -256,7 +256,6 @@ export class UserMediaInteractionsService {
     if (error) throw error;
   }
 
-  // Méthodes utilitaires
   async getUserRatings(
     userId: string,
     mediaType?: 'movie' | 'tv',
@@ -315,7 +314,7 @@ export class UserMediaInteractionsService {
       .eq('media_type', mediaType)
       .not('rating', 'is', null);
 
-    // Gestion des saisons et épisodes
+    // Gestión de las temporadas y episodios
     if (seasonNumber !== undefined) {
       query = query.eq('season_number', seasonNumber);
     } else if (mediaType === 'movie') {
@@ -358,7 +357,7 @@ export class UserMediaInteractionsService {
       .is('episode_number', null)
       .not('rating', 'is', null);
 
-    // Si un type de média spécifique est demandé
+    // Si se solicita un tipo de medio específico
     if (mediaType) {
       query = query.eq('media_type', mediaType);
     }
