@@ -138,7 +138,7 @@ export class UserMediaInteractionsController {
     return this.userMediaInteractionsService.remove(id, userId);
   }
 
-  @Get('all-ratings')
+  @Get('all/ratings')
   async getAllRatings() {
     return this.userMediaInteractionsService.getAllRatings();
   }
