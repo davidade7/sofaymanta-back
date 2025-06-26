@@ -5,13 +5,14 @@ meta {
 }
 
 get {
-  url: http://localhost:3000/media/recommendations?userId=user123&lang=es-ES&page=1
+  url: http://localhost:3000/media/recommendations/tv?userId=ba193a6e-2df7-4d85-850c-3baeb36b9d4a&lang=es-ES&page=1&limit=50
   body: none
   auth: inherit
 }
 
 params:query {
-  userId: user123
+  userId: ba193a6e-2df7-4d85-850c-3baeb36b9d4a
   lang: es-ES
   page: 1
+  limit: 50
 }
