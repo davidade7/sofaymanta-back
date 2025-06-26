@@ -15,11 +15,11 @@ export class StreamingPlatformsService {
   async create(
     createDto: CreateStreamingPlatformDto,
   ): Promise<StreamingPlatform> {
-    // Vérifier si le code existe déjà
+    // Verificar si el código ya existe
     const existing = await this.findByCode(createDto.code);
     if (existing) {
       throw new ConflictException(
-        `Une plateforme avec le code '${createDto.code}' existe déjà`,
+        `Una plataforma con el código '${createDto.code}' ya existe`,
       );
     }
 
@@ -53,7 +53,7 @@ export class StreamingPlatformsService {
     }
 
     const { data, error }: { data: StreamingPlatform[] | null; error: any } =
-      await query.order('name', { ascending: true }); // Changé de 'display_name' à 'name'
+      await query.order('name', { ascending: true });
 
     if (error) throw error;
     return data || [];
@@ -108,12 +108,12 @@ export class StreamingPlatformsService {
     id: string,
     updateDto: UpdateStreamingPlatformDto,
   ): Promise<StreamingPlatform> {
-    // Si on change le code, vérifier qu'il n'existe pas déjà
+    // Si cambiamos el código, verificar que no exista ya
     if (updateDto.code) {
       const existing = await this.findByCode(updateDto.code);
       if (existing && existing.id !== id) {
         throw new ConflictException(
-          `Une plateforme avec le code '${updateDto.code}' existe déjà`,
+          `Una plataforma con el código '${updateDto.code}' ya existe`,
         );
       }
     }

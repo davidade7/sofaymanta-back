@@ -2,7 +2,7 @@ import { IsString, IsOptional, IsBoolean, IsUrl } from 'class-validator';
 
 export class CreateStreamingPlatformDto {
   @IsString()
-  code: string; // 'netflix', 'prime_video'
+  code: string; // code from TMDB
 
   @IsString()
   name: string; // 'Netflix', 'Prime Video'
