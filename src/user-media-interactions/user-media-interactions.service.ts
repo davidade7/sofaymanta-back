@@ -15,7 +15,7 @@ export class UserMediaInteractionsService {
   constructor(
     private supabaseService: SupabaseService,
     private mediaService: MediaService,
-  ) {}
+  ) { }
 
   async create(
     userId: string,
@@ -56,7 +56,7 @@ export class UserMediaInteractionsService {
 
     if (error) throw error;
     if (!data) {
-      throw new NotFoundException('UserMediaInteraction not found');
+      throw new NotFoundException('Interacción de usuario con el contenido no encontrada');
     }
     return data;
   }
@@ -202,13 +202,13 @@ export class UserMediaInteractionsService {
     if (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error.code === 'PGRST116') {
-        throw new NotFoundException(`Interaction with ID ${id} not found`);
+        throw new NotFoundException(`Interacción con ID ${id} no encontrada`);
       }
       throw error;
     }
 
     if (!data) {
-      throw new NotFoundException(`Interaction with ID ${id} not found`);
+      throw new NotFoundException(`Interacción con ID ${id} no encontrada`);
     }
 
     return data;
@@ -236,14 +236,14 @@ export class UserMediaInteractionsService {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error.code === 'PGRST116') {
         throw new NotFoundException(
-          `Interaction with ID ${id} not found or access denied`,
+          `Interacción con ID ${id} no encontrada o acceso denegado`,
         );
       }
       throw error;
     }
 
     if (!data) {
-      throw new NotFoundException(`Interaction with ID ${id} not found`);
+      throw new NotFoundException(`Interacción con ID ${id} no encontrada`);
     }
 
     return data;

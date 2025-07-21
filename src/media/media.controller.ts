@@ -10,7 +10,7 @@ export class MediaController {
     private readonly mediaService: MediaService,
     private readonly userMediaInteractionsService: UserMediaInteractionsService,
     private readonly userProfileService: UserProfileService,
-  ) {}
+  ) { }
 
   @Get('search')
   async searchMultimedia(
@@ -132,7 +132,7 @@ export class MediaController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
   ): Promise<any> {
     if (!userId) {
-      throw new Error('userId is required');
+      throw new Error('Se requiere userId');
     }
 
     return this.mediaService.getPersonalizedRecommendations(
@@ -154,7 +154,7 @@ export class MediaController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
   ): Promise<any> {
     if (!userId) {
-      throw new Error('userId is required');
+      throw new Error('Se requiere userId');
     }
 
     return this.mediaService.getPersonalizedRecommendations(
@@ -176,7 +176,7 @@ export class MediaController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
   ): Promise<any> {
     if (!userId) {
-      throw new Error('userId is required');
+      throw new Error('Se requiere userId');
     }
 
     return this.mediaService.getPersonalizedRecommendations(

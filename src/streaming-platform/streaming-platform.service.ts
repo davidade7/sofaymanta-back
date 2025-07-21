@@ -10,7 +10,7 @@ import type { StreamingPlatform } from './entities/streaming-platform.entity';
 
 @Injectable()
 export class StreamingPlatformsService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(private supabaseService: SupabaseService) { }
 
   async create(
     createDto: CreateStreamingPlatformDto,
@@ -38,7 +38,7 @@ export class StreamingPlatformsService {
         .single();
 
     if (error) throw error;
-    if (!data) throw new NotFoundException('StreamingPlatform not created');
+    if (!data) throw new NotFoundException('No se pudo crear la plataforma de streaming');
     return data;
   }
 
@@ -72,14 +72,14 @@ export class StreamingPlatformsService {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error.code === 'PGRST116') {
         throw new NotFoundException(
-          `StreamingPlatform with ID ${id} not found`,
+          `Plataforma de streaming con ID ${id} no encontrada`,
         );
       }
       throw error;
     }
 
     if (!data) {
-      throw new NotFoundException(`StreamingPlatform with ID ${id} not found`);
+      throw new NotFoundException(`Plataforma de streaming con ID ${id} no encontrada`);
     }
 
     return data;
@@ -134,14 +134,14 @@ export class StreamingPlatformsService {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error.code === 'PGRST116') {
         throw new NotFoundException(
-          `StreamingPlatform with ID ${id} not found`,
+          `Plataforma de streaming con ID ${id} no encontrada`,
         );
       }
       throw error;
     }
 
     if (!data) {
-      throw new NotFoundException(`StreamingPlatform with ID ${id} not found`);
+      throw new NotFoundException(`Plataforma de streaming con ID ${id} no encontrada`);
     }
 
     return data;
